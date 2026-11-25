@@ -4,7 +4,7 @@
     "description": "Eklenti adı"
   },
   "appDescription": {
-    "message": "Açık sekme URL'lerinin tümünü düz metin, Markdown, JSON, CSV veya TSV olarak kopyalayın. İzleme yok, sunucu yok, hesap yok.",
+    "message": "Sekmeleri yerelde kaydedin; metin, Markdown, JSON, CSV veya TSV kopyalayın. İsteğe bağlı yerel Laya.",
     "description": "Chrome Web Store'da gösterilen eklenti açıklaması"
   },
   "loading": {
@@ -115,5 +115,9 @@
   "noTabs": {
     "message": "Sekme bulunamadı.",
     "description": "Sıfır sekme döndüğünde gösterilir"
+  },
+  "exportNotice": {
+    "message": "Dışa aktarımlar URL'lerdeki gizlilik bilgilerini ve (izin verilmişse) Gizli sekme verilerini içerebilir. Listeyi ve panoyu hassas kabul edin; yalnızca güvenilir yerlere yapıştırın.",
+    "description": "Dışa aktarma işlemlerinin altındaki hassas veri ve yapıştırma uyarı metni"
   }
 }

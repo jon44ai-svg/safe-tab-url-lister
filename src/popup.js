@@ -484,7 +484,39 @@ function formatMarkdownLink(tab, withTitles) {
     ? tab.title || getHostname(url).replace(/^www\./i, "")
     : getHostname(url).replace(/^www\./i, "");
 
+  /*
+   * Dangerous schemes must not become clickable Markdown links in
+   * destination apps. Keep the raw URL as escaped inline code instead.
+   */
+  if (hasDangerousUrlScheme(url)) {
+    const safeLabel = escapeMarkdownText(label || url);
+    const safeUrl = escapeMarkdownText(url).replace(/`/g, "'");
+    return `${safeLabel} (\`${safeUrl}\`)`;
+  }
+
   return `[${escapeMarkdownText(label)}](${escapeMarkdownUrl(url)})`;
+}
+
+/**
+ * Schemes that many Markdown/HTML consumers may execute or open unsafely
+ * when rendered as links. Plain/JSON/CSV/TSV still export the raw URL.
+ */
+function hasDangerousUrlScheme(url) {
+  if (!url) {
+    return false;
+  }
+
+  try {
+    const scheme = new URL(url).protocol.toLowerCase();
+    return (
+      scheme === "javascript:" ||
+      scheme === "data:" ||
+      scheme === "vbscript:" ||
+      scheme === "blob:"
+    );
+  } catch {
+    return /^\s*(javascript|data|vbscript|blob)\s*:/i.test(url);
+  }
 }
 
 
@@ -510,11 +542,12 @@ function getHostname(url) {
 function escapeDelimitedValue(value, delimiter) {
 
   /*
-   * Preserve each record as one physical line
-   * Tabs, newlines, and backslashes are escaped.
+   * Preserve each record as one physical line.
+   * Neutralize common spreadsheet formula prefixes (incl. "|") and
+   * escape tabs, newlines, and backslashes.
    */
   const text = String(value ?? "")
-    .replace(/^([=+\-@\t\r])/, "'$1")
+    .replace(/^([=+\-@|\t\r])/, "'$1")
     .replace(/([\\\t\r\n])/g, "\\$1");
 
   if (delimiter === ",") {

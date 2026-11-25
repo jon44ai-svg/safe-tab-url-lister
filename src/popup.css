@@ -126,6 +126,14 @@ button:hover { background: #f3f4f6; }
 #status.success { color: #047857; }
 #status.error   { color: #b91c1c; }
 
+/* ── Export caution ── */
+.notice {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #6b7280;
+}
+
 /* ── Dark mode ── */
 @media (prefers-color-scheme: dark) {
   body     { background: #111827; color: #f9fafb; }
@@ -137,6 +145,7 @@ button:hover { background: #f3f4f6; }
 
   #status.success { color: #34d399; }
   #status.error   { color: #f87171; }
+  .notice { color: #9ca3af; }
 
   :focus-visible { outline-color: #60a5fa; }
 }

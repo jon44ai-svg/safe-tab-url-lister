@@ -4,7 +4,7 @@
     "description": "Extension name"
   },
   "appDescription": {
-    "message": "Copy all open tab URLs as plain text, Markdown, JSON, CSV, or TSV. Zero tracking, no servers, no accounts.",
+    "message": "Save tabs locally and copy them as text, Markdown, JSON, CSV, or TSV. Optional localhost Laya only.",
     "description": "Extension description shown in the Chrome Web Store"
   },
   "loading": {
@@ -116,5 +116,9 @@
   "noTabs": {
     "message": "No tabs found.",
     "description": "Shown when zero tabs are returned"
+  },
+  "exportNotice": {
+    "message": "Exports can include secrets in URLs and, if allowed, Incognito tabs. Treat the list and clipboard as sensitive; paste only into trusted destinations.",
+    "description": "Caution shown under the export actions about sensitive data and paste destinations"
   }
 }
