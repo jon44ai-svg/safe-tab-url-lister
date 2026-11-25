@@ -22,7 +22,12 @@ extensions/
 
 # Node
 node_modules/
+.tmp/
+.pnpm-store/
 npm-debug.log*
+
+# Machine-local MCP path
+.cursor/mcp.json
 
 # Editor
 .vscode/
