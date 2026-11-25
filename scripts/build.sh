@@ -2,51 +2,33 @@
 
 SCRIPTDIR=$(dirname "$0")
 BASEDIR=$(dirname "$SCRIPTDIR")
-DISTDIR="$BASEDIR/dist"
 
 DOWHAT=""
 if [ -z "$1" ] || [ "$1" = "all" ]; then
   DOWHAT="all"
-elif [ "$1" = "chrome" ]; then
-  DOWHAT="chrome"
-elif [ "$1" = "firefox" ]; then
-  DOWHAT="firefox"
-elif [ "$1" = "safari" ]; then
-  DOWHAT="safari"
-fi
-if [ -z "$DOWHAT" ]; then
+elif [ "$1" = "chrome" ] || [ "$1" = "firefox" ] || [ "$1" = "safari" ]; then
+  DOWHAT="$1"
+else
   echo "unknown browser: $1"
   exit 1
 fi
 
-if [ ! -d "$DISTDIR" ]; then
-    mkdir "$DISTDIR"
+cd "$BASEDIR" || exit 1
+if ! command -v pnpm >/dev/null 2>&1; then
+  corepack enable
+  corepack prepare pnpm@10.12.4 --activate
 fi
+pnpm install --frozen-lockfile
+pnpm build
 
-do_build() {
-    BROWSER="$1"
-    if [ ! -f "$BASEDIR/src/manifest/manifest.$BROWSER.json" ]; then
-        if [ "$DOWHAT" = "$BROWSER" ]; then
-            echo "Manifest not found for $BROWSER"
-            exit 1
-        fi
-        return
-    fi
-    if [ ! -d "$DISTDIR/$BROWSER" ]; then
-        mkdir "$DISTDIR/$BROWSER"
-    fi
-    cp -p "$BASEDIR/src/popup.css" "$BASEDIR/src/popup.html" "$BASEDIR/src/popup.js" "$DISTDIR/$BROWSER/"
-    rsync -a "$BASEDIR/src/icons/" "$DISTDIR/$BROWSER/icons/"
-    rsync -a "$BASEDIR/src/_locales/" "$DISTDIR/$BROWSER/_locales/"
-    cp -p "$BASEDIR/src/manifest/manifest.$BROWSER.json" "$DISTDIR/$BROWSER/manifest.json"
-}
-
-if [ "$DOWHAT" = "all" ] || [ "$DOWHAT" = "chrome" ]; then
-    do_build "chrome"
+if [ "$DOWHAT" = "all" ]; then
+  set -- chrome firefox safari
+else
+  set -- "$DOWHAT"
 fi
-if [ "$DOWHAT" = "all" ] || [ "$DOWHAT" = "firefox" ]; then
-    do_build "firefox"
-fi
-if [ "$DOWHAT" = "all" ] || [ "$DOWHAT" = "safari" ]; then
-    do_build "safari"
-fi
+for BROWSER in "$@"; do
+  if [ ! -f "$BASEDIR/dist/$BROWSER/manifest.json" ]; then
+    echo "Directory for $BROWSER not found"
+    exit 1
+  fi
+done
