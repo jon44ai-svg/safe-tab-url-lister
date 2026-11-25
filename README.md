@@ -1,423 +1,55 @@
-# Safe Tab URL Lister — Copy All Chrome Tab URLs Instantly
+# Safe Tab URL Lister
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-green.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-v1.2.1-blue?logo=google-chrome)](https://chrome.google.com/webstore/detail/lfoiekncpjoomigglgjildmjodpfmoif)
 [![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20TR-orange.svg)](src/_locales/)
 
-A free, open-source Chrome, Firefox and Safari extension that collects every URL from your open tabs and copies them in the format you need — plain text, Markdown links, a JSON array, CSV or TSV. No servers, no tracking, no accounts. Everything runs locally in your browser.
+Local-first Manifest V3 side panel for saving open tabs and finding them again. Optional classification uses a Laya server on your machine. No accounts and no remote analytics.
 
----
+## What it does
 
-## The Problem This Solves
+- Lists open tabs and tabs saved in `chrome.storage.local` (title, domain, tags, sensitive badge).
+- Saves the current window set for later and reopens one tab at a time.
+- Groups by domain, Laya category, Laya page type, or nested folder.
+- Debounced search over title, domain, path, tags, category, and folder name. Secret query values are not part of the search text.
+- Manual tags, nested folders, and Laya fast tagging: focus a saved row and press 1–9.
+- Export plain, Markdown, Markdown list, JSON, CSV, or TSV, with paste and scheme safeguards.
 
-When you have 20, 50, or 100 tabs open and need to save, share, or process those URLs, browsers give you no built-in way to extract them as text. Bookmarking all tabs is permanent and clutters your bookmark bar. Taking a screenshot loses the clickable URLs. Manually copying each address is slow and error-prone.
+## Privacy delta
 
-Safe Tab URL Lister solves this in one click. Click the icon, choose your format (plain text, Markdown, JSON, CSV or TSV), and copy. Your URLs are on the clipboard, ready to paste into a document, a spreadsheet, a code editor, or an AI chat window.
+The original extension only used `tabs` and kept nothing. This build also uses:
 
----
+| Permission | Why |
+| --- | --- |
+| `storage` | Saved tabs, folders, and tags stay on this device |
+| `sidePanel` | Chrome side panel |
+| `http://127.0.0.1:8000/*`, `http://localhost:8000/*` | Local `laya-serve` only |
 
-## Quick Facts
+Full URLs are masked by default. Storing the original URL (query and fragment included) is opt-in. Laya receives title, host, and path only.
 
-| Property | Value |
-|---|---|
-| Output formats | Plain URLs, Markdown links, Markdown list, JSON array, CSV, TSV |
-| Permissions required | `tabs` |
-| Network requests | Zero |
-| Data collection | None |
-| Price | Free |
-| Source | Open source (MIT) |
-| Minimum Chrome version | 88 |
-| Languages | English, Turkish |
-| Accessibility | WCAG 2.1 AA |
+Run Laya 0.4.x with `LAYA_HOST=127.0.0.1` and `LAYA_PORT=8000`. The extension calls `GET /health`, `POST /v1/systemone`, and `POST /v1/systemone/batch`. If Laya is down, save, search, domain grouping, and manual tags still work.
 
----
+**Treat exports as sensitive.** URLs can still contain secrets, and Copy puts that text on the clipboard. Paste only into trusted apps. CSV/TSV formula neutralization and Markdown escaping are best-effort.
 
-## Screenshots
+## Develop
 
-| Plain URLs | Markdown Links | Dark Mode |
-|:---:|:---:|:---:|
-| ![Plain](docs/screenshots/store-screenshot-1-plain.png) | ![Markdown](docs/screenshots/store-screenshot-2-markdown.png) | ![Dark](docs/screenshots/store-screenshot-3-dark.png) |
-
----
-
-## Features
-
-- **List URLs** from the current window or all open browser windows
-- **Include page titles** alongside each URL (optional)
-- **6 output formats:**
-  - Plain URLs — one per line
-  - Markdown — `[Page Title](https://url)`
-  - Markdown list — same links as a bullet list, with any extra included fields (index, IDs, group, last accessed) as sub-bullets:
-    ```markdown
-    * [Page Title](https://url)
-        * Tab Id: 55
-    ```
-  - JSON — structured array for developers
-  - CSV — spreadsheet-ready, columns adjust to whichever options are checked
-  - TSV — tab-separated values, same column behavior as CSV
-- **Optional per-tab fields** — tab index, tab ID / opener tab ID, numeric tab group, and last-accessed timestamp, each behind its own checkbox
-- **Per-window grouping** — when "Include all windows" is checked, output is broken into sections by window (and flags incognito windows)
-- **One-click copy** to clipboard
-- **Dark mode** support (follows system preference)
-- **Keyboard accessible** (WCAG 2.1 AA)
-- **Bilingual** — English and Turkish
-- **Safari limitations** — Safari does not support the *Last Accessed* or *Group* options; those two checkboxes are hidden automatically when running in Safari.
-
----
-
-## Who Uses This
-
-**Researchers and academics** — capture all source URLs at the end of a reading session without manually copying each address.
-
-**Developers and engineers** — grab all open tabs as a JSON array to pipe into scripts, bug reports, or data tools.
-
-**Writers and editors** — export tabs as Markdown links (`[Page Title](URL)`) ready to paste directly into articles, wikis, README files, or documentation.
-
-**Students** — save all reference tabs before closing the browser so nothing is lost between study sessions.
-
-**Data analysts** — export to CSV and open directly in Excel, Google Sheets, or LibreOffice Calc.
-
-**AI assistant users** — paste a clean URL list into ChatGPT, Claude, Gemini, or Perplexity to let the AI summarize, categorize, or compare your open pages.
-
----
-
-## Privacy
-
-This extension is designed with a minimal-permission, zero-data-collection approach:
-
-| What | Status |
-|------|--------|
-| Permissions | Only `tabs` — nothing else |
-| `host_permissions` | None |
-| Background service worker | None |
-| Network requests | None |
-| Data collection / analytics | None |
-| Cookies / storage | None |
-| External dependencies | None |
-
-**Your browsing data never leaves your device.** The extension processes everything in memory and discards it when the popup closes. Safe for use in enterprise environments and sensitive browsing sessions.
-
----
-
-## Installation
-
-For each installation type, enabling the Extension, authorizing permissions and websites, and if applicable access to Incognito / Private tabs may be required.
-
-### Chrome ###
-
-#### From Chrome Web Store
-
-[Install from the Chrome Web Store](https://chrome.google.com/webstore/detail/lfoiekncpjoomigglgjildmjodpfmoif)
-
-#### Load Unpacked (Developer Mode)
-
-1. Clone or download this repository
-2. Build: `./scripts/build.sh chrome`
-3. Open `chrome://extensions/`
-4. Enable **Developer mode** (top-right toggle)
-5. Click **Load unpacked** → select the ./dist/chrome folder
-
-### Firefox ###
-
-#### From Firefox Add-ons Store
-
-Not yet available.
-
-#### Load Temporary Add-on
-
-1. Clone or download this repository
-2. Build: `./scripts/build.sh firefox`
-3. Open `about:debugging#/runtime/this-firefox`
-4. Click the **Load Temporary Add-on...** button
-5. Select the manifest.json file in the ./dist/firefox folder and click the **Open** button
-
-### Safari ###
-
-Safari support ships as a plain web extension for now (no packaged Mac/iOS app yet — that work lives on a separate branch pending an Apple Developer account).
-
-#### Load Temporary Extension (macOS)
-
-1. Clone or download this repository
-2. Build: `./scripts/build.sh safari`
-3. Open Safari Settings
-4. If *Developer* features are not enabled, click the **Advanced** tab and enable **Show features for web developers**
-5. Click the **Developer** tab
-6. Click **Add Temporary Extension**
-7. Select the ./dist/safari folder and click **Select**
-
----
-
-## Output Format Examples
-
-### Plain URLs
-
-One URL per line, with no decoration. Use this when you want the simplest possible output to paste into a text file, a terminal command, or a message.
-
-```
-https://github.com
-
-https://example.com
-
-https://news.ycombinator.com
+```sh
+pnpm install
+pnpm test
+pnpm build
 ```
 
-### Plain URLs w/ All Includes ###
-
-`Group` shows the numeric tab group ID only — Safari and Firefox don't expose group names or colors without an extra permission this extension deliberately doesn't request, so the group is identified by its ID (enough to tell "these tabs are grouped together").
-
-```
-Window: 1526122566
-
-1. Publish in the Chrome Web Store  |  Chrome Extensions  |  Chrome for Developers
-https://developer.chrome.com/docs/webstore/publish
-Tab Id: 57
-Last Accessed: 2026-08-02T18:11:11.000Z
-
-2. Creating a great listing page  |  Chrome Extensions  |  Chrome for Developers
-https://developer.chrome.com/docs/webstore/best-listing
-Tab Id: 55
-Last Accessed: 2026-07-25T21:11:40.000Z
-
-
-Window: 73
-
-1. GitHub - anthropics/claude-code
-https://github.com/anthropics/claude-code
-Tab Id: 92
-Last Accessed: 2026-08-06T23:59:29.000Z
-
-2. Hacker News
-https://news.ycombinator.com/
-Tab Id: 52
-Last Accessed: 2026-08-07T21:24:39.000Z
-
-
-Window: 83 [incognito]
-
-1. Chrome Extensions  |  Chrome for Developers
-https://developer.chrome.com/docs/extensions
-Tab Id: 93
-Group: 181
-Last Accessed: 2026-08-07T21:36:51.000Z
-
-2. Extensions / How to  |  Chrome for Developers
-https://developer.chrome.com/docs/extensions/how-to
-Tab Id: 103
-Opened By: 93
-Group: 181
-Last Accessed: 2026-08-07T21:39:18.000Z
-
-3. Newest 'google-chrome-extension' Questions - Stack Overflow
-https://stackoverflow.com/questions/tagged/google-chrome-extension
-Tab Id: 97
-Group: 181
-Last Accessed: 2026-08-07T21:36:48.000Z
-```
-
-### Markdown Links
-
-Outputs `[Page Title](URL)` for each tab. Paste directly into any Markdown editor, GitHub README, Notion page, Obsidian vault, or wiki.
-
-```markdown
-[GitHub](https://github.com)
-[Example Domain](https://example.com)
-[Hacker News](https://news.ycombinator.com)
-```
-
-### Markdown Links w/ All Includes
-
-```markdown
-Window: 1526122566
-
-1. [Publish in the Chrome Web Store  |  Chrome Extensions  |  Chrome for Developers](https://developer.chrome.com/docs/webstore/publish) Tab: 57 (2026-08-02T18:11:11.000Z)
-2. [Creating a great listing page  |  Chrome Extensions  |  Chrome for Developers](https://developer.chrome.com/docs/webstore/best-listing) Tab: 55 (2026-07-25T21:11:40.000Z)
-
-
-Window: 73
-
-1. [GitHub - anthropics/claude-code](https://github.com/anthropics/claude-code) Tab: 92 (2026-08-06T23:59:29.000Z)
-2. [Hacker News](https://news.ycombinator.com/) Tab: 52 (2026-08-07T21:24:39.000Z)
-
-
-Window: 83 [incognito]
-
-1. [Chrome Extensions  |  Chrome for Developers](https://developer.chrome.com/docs/extensions) Tab: 93 [Group: 181] (2026-08-07T21:36:51.000Z)
-2. [Extensions / How to  |  Chrome for Developers](https://developer.chrome.com/docs/extensions/how-to) Tab: 103 (Opened By: 93) [Group: 181] (2026-08-07T21:39:18.000Z)
-3. [Newest 'google-chrome-extension' Questions - Stack Overflow](https://stackoverflow.com/questions/tagged/google-chrome-extension) Tab: 97 [Group: 181] (2026-08-07T21:36:48.000Z)
-```
-
-### Markdown List
-
-Same links as Markdown, but as a bullet list with any extra included fields as sub-bullets — useful when you want the per-tab metadata visible without cramming it into one line.
-
-```markdown
-* [GitHub](https://github.com)
-* [Example Domain](https://example.com)
-* [Hacker News](https://news.ycombinator.com)
-```
-
-### JSON Array
-
-By default, only `url` is included. Every other field — `title`, `windowId`, `index`, tab/opener IDs, `groupId`, `incognito`, `lastAccessed` — is present only when its checkbox is checked, and always in this key order: `url, windowId, index, title, id, openerTabId, groupId, incognito, lastAccessed`.
-
-```json
-[
-  { "url": "https://github.com" },
-  { "url": "https://example.com" },
-  { "url": "https://news.ycombinator.com" }
-]
-```
-
-### JSON Array w/ All Includes
-
-```json
-[
-  {
-    "url": "https://developer.chrome.com/docs/extensions",
-    "windowId": 83,
-    "index": 0,
-    "title": "Chrome Extensions  |  Chrome for Developers",
-    "id": 93,
-    "openerTabId": "",
-    "groupId": 181,
-    "incognito": true,
-    "lastAccessed": "2026-08-07T21:36:51.000Z"
-  },
-  {
-    "url": "https://developer.chrome.com/docs/extensions/how-to",
-    "windowId": 83,
-    "index": 1,
-    "title": "Extensions / How to  |  Chrome for Developers",
-    "id": 103,
-    "openerTabId": 93,
-    "groupId": 181,
-    "incognito": true,
-    "lastAccessed": "2026-08-07T21:39:18.000Z"
-  },
-  {
-    "url": "https://stackoverflow.com/questions/tagged/google-chrome-extension",
-    "windowId": 83,
-    "index": 2,
-    "title": "Newest 'google-chrome-extension' Questions - Stack Overflow",
-    "id": 97,
-    "openerTabId": "",
-    "groupId": 181,
-    "incognito": true,
-    "lastAccessed": "2026-08-07T21:36:48.000Z"
-  }
-]
-```
-
-### CSV
-
-By default, only a `url` column is included — checked options add columns (see below). Open directly in Microsoft Excel, Google Sheets, or any CSV-compatible tool.
-
-```csv
-"url"
-"https://developer.chrome.com/docs/extensions"
-"https://developer.chrome.com/docs/extensions/how-to"
-"https://stackoverflow.com/questions/tagged/google-chrome-extension"
-```
-
-### CSV w/ All Includes
-
-Column order matches the JSON key order above (minus `url` moving after `windowId`/`index`): `windowId, index, title, url, Tab Id, Opened By Tab Id, Group Id, incognito, lastAccessed`. Values that would let a title be misread as a spreadsheet formula (a leading `=`, `+`, `-`, or `@`) are automatically neutralized.
-
-```csv
-"windowId","index","title","url","Tab Id","Opened By Tab Id","Group Id","incognito","lastAccessed"
-"83","0","Chrome Extensions  |  Chrome for Developers","https://developer.chrome.com/docs/extensions","93","","181","true","2026-08-07T21:36:51.000Z"
-"83","1","Extensions / How to  |  Chrome for Developers","https://developer.chrome.com/docs/extensions/how-to","103","93","181","true","2026-08-07T21:39:18.000Z"
-"83","2","Newest 'google-chrome-extension' Questions - Stack Overflow","https://stackoverflow.com/questions/tagged/google-chrome-extension","97","","181","true","2026-08-07T21:36:48.000Z"
-```
-
-### TSV
-
-Same columns and behavior as CSV, delimited by tabs instead of commas.
-
-```tsv
-windowId	index	title	url	Tab Id	Opened By Tab Id	Group Id	incognito	lastAccessed
-83	0	Chrome Extensions  |  Chrome for Developers	https://developer.chrome.com/docs/extensions	93		181	true	2026-08-07T21:36:51.000Z
-83	1	Extensions / How to  |  Chrome for Developers	https://developer.chrome.com/docs/extensions/how-to	103	93	181	true	2026-08-07T21:39:18.000Z
-83	2	Newest 'google-chrome-extension' Questions - Stack Overflow	https://stackoverflow.com/questions/tagged/google-chrome-extension	97		181	true	2026-08-07T21:36:48.000Z
-```
-
----
-
-## How It Compares
-
-| Method | Drawback |
-|---|---|
-| Bookmark all tabs | Permanent, clutters bookmarks, not portable as text |
-| Screenshot | Not selectable text, no clickable links |
-| Session manager extensions | Often require accounts or sync, large permission sets |
-| Manual copy-paste | Slow, error-prone for more than a handful of tabs |
-| **Safe Tab URL Lister** | **One click, 6 formats to choose, zero tracking, no account needed** |
-
----
-
-## Browser Compatibility
-
-Built with Manifest V3. Works in any Chromium-based browser that supports MV3 extensions:
-
-- Google Chrome 88+
-- Microsoft Edge 88+
-- Brave Browser
-- Vivaldi
-- Opera (with Chrome extension support enabled)
-- Firefox 109+
-- Safari (macOS and iOS) — the *Last Accessed* and *Group* options are hidden, since Safari doesn't expose that data to extensions
-
----
-
-## Frequently Asked Questions
-
-**How do I copy all my open browser tab URLs at once?**
-Install Safe Tab URL Lister, click the extension icon, and press Copy. All tab URLs from the current window are on your clipboard immediately.
-
-**Can I export browser tabs as Markdown links?**
-Yes. Select "Markdown links" from the format dropdown. The output will be a list of `[Page Title](URL)` entries, one per tab, ready to paste into Obsidian, Notion, GitHub, or any Markdown editor.
-
-**Is there a browser extension that exports tabs as JSON?**
-Yes. Select the JSON format. Each element always has a `url` field; check "Titles" (or any other option) to add more fields to every element.
-
-**Does this extension send my data anywhere?**
-No. There are zero network requests. The extension has no servers, no analytics, and no external dependencies of any kind. Your URLs never leave your device.
-
-**How do I save all browser tabs without using bookmarks?**
-Use Safe Tab URL Lister to copy your tabs as plain text, Markdown, JSON, CSV, or TSV, then paste into any text editor or spreadsheet for future reference.
-
-**Can I get tab URLs from multiple browser windows?**
-Yes. Enable the "Include all windows" checkbox to collect tabs from every open browser window at once.
-
-**Does it work offline?**
-Yes, completely. The extension has no dependency on any external service.
-
-**Can I use this with Incognito / Private tabs?**
-Browsers require you to manually grant extensions access to Incognito / Private windows. 
- * Chrome: Go to `chrome://extensions`, find Safe Tab URL Lister, and enable "Allow in Incognito".
- * Firefox: Go to `about:addons`, find *Safe Tab URL Lister*, and allow "Run in Private Windows"
- * Safari: From the Safari "Settings", select the "Extensions" and under *Private Browsing* enable "Allow in Private Browsing".
-
- ---
-
-## Development
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, code style guidelines, and how to build the store zip.
-
-**Regenerate icons:**
-```bash
-node scripts/generate-icons.js
-```
-
----
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md).
-
----
-
-## License
-
-[MIT](LICENSE) © 2026 Mümin Köykıran
+Load `dist/chrome` as an unpacked extension. Firefox and Safari manifests are thin wrappers in `dist/firefox` and `dist/safari` (sidebar or popup pointing at the same panel). They are not store-ready packages.
+
+## Not in this MVP
+
+- Cross-device sync and accounts
+- Reading page DOM for classification (that would need broad host permissions)
+- Encrypted backups or a passphrase vault
+- Dead-link crawler or archive.org
+- Auto-close after save, or Session Buddy-style session restore
+- Shared team libraries
+- Polished Firefox or Safari store packages
+- On-device Laya weights inside the extension (classification stays an external `laya-serve`)
+- Mobile browsers

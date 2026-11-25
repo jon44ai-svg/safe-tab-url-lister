@@ -90,7 +90,7 @@
         "name": "Does this extension send my data anywhere?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "No. There are zero network requests. Your URLs never leave your device."
+          "text": "Saved tabs stay on this device. The only optional requests go to a Laya server you run on localhost, and those requests omit query strings and fragments."
         }
       },
       {
@@ -819,7 +819,7 @@ https://github.com
             <path d="M10 2 3 5.25V10c0 4.125 3.125 7.25 7 8.75 3.875-1.5 7-4.625 7-8.75V5.25L10 2z" stroke="var(--color-green)" stroke-width="1.5" stroke-linejoin="round"/>
             <path d="M7 10l2 2 4-4" stroke="var(--color-green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <p>Safe Tab URL Lister makes <strong>zero network requests</strong>. All processing happens locally in your browser. No data is ever transmitted, stored on a server, or shared with third parties.</p>
+          <p>Safe Tab URL Lister does not phone home. Saved tabs stay in local extension storage. The only optional requests go to a Laya process on <strong>127.0.0.1:8000</strong> or <strong>localhost:8000</strong>, and they omit query strings and fragments.</p>
         </div>
 
         <table class="perm-table" aria-label="Chrome permissions required by the extension">
@@ -845,7 +845,7 @@ https://github.com
         </table>
 
         <p style="margin-top:1rem; font-size:0.875rem; color: var(--color-muted);">
-          Only the <code>tabs</code> permission is declared in the manifest. No host permissions, no storage, no background scripts.
+          Chrome also declares <code>storage</code>, <code>sidePanel</code>, and host access limited to <code>http://127.0.0.1:8000/*</code> and <code>http://localhost:8000/*</code>.
           Full details in the <a href="privacy.html">privacy policy</a>.
         </p>
       </div>
@@ -905,7 +905,7 @@ https://github.com
               </svg>
             </summary>
             <div class="faq-answer">
-              No. There are zero network requests. Your URLs never leave your device.
+              Saved tabs stay on this device. The only optional requests go to a Laya server you run on localhost, and those requests omit query strings and fragments.
             </div>
           </details>
 

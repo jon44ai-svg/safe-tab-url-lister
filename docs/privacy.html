@@ -76,10 +76,10 @@
 <body>
   <main>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: August 29, 2026 — applies to version 1.2.0 and later.</p>
+    <p class="updated">Last updated: November 25, 2026 — applies to version 1.2.1 and later.</p>
 
     <div class="summary">
-      <p><strong>Short version:</strong> Safe Tab URL Lister collects no data, sends no data anywhere, and has no servers. Everything happens inside your browser and is discarded the moment you close the popup.</p>
+      <p><strong>Short version:</strong> Safe Tab URL Lister does not send data to the developer. Saved tabs stay in local extension storage. The only optional network calls go to a Laya server you run at <code>127.0.0.1:8000</code> or <code>localhost:8000</code>, and those calls omit query strings and fragments.</p>
     </div>
 
     <h2>What the extension reads</h2>
@@ -95,21 +95,20 @@
     <p>Each of these fields only appears in the extension's output if you explicitly check its corresponding option in the popup. With every option unchecked, only the URL is included.</p>
 
     <h2>What the extension does with that data</h2>
-    <p>It formats the data you asked for (as plain text, Markdown, JSON, CSV, or TSV) and copies it to your clipboard when you click "Copy." That's it. The data is held in memory only, for as long as the popup is open, and is discarded — not stored, not cached, not written to disk — the moment the popup closes.</p>
+    <p>It lists open tabs and, when you save them, writes title, redacted URL, tags, and folders to <code>chrome.storage.local</code> on this device. The original URL is stored only if you opt in. Copy still puts the export on the clipboard. Treat that text as sensitive. An optional local Laya request sends title, host, and path only — never the query or fragment.</p>
 
     <h2>What the extension does <em>not</em> do</h2>
     <ul>
-      <li>No network requests of any kind — the extension has no server to send data to, and doesn't talk to one</li>
-      <li>No analytics, telemetry, or crash reporting</li>
-      <li>No cookies, no <code>storage</code> permission, nothing persisted between sessions</li>
-      <li>No <code>host_permissions</code> — the extension cannot read the content of any web page</li>
-      <li>No background service worker — it only runs while its popup is open</li>
+      <li>No analytics, telemetry, or crash reporting, and no requests to the developer's servers</li>
+      <li>No cookies. <code>storage</code> is used only for tabs you save on this device</li>
+      <li><code>host_permissions</code> are limited to <code>http://127.0.0.1:8000/*</code> and <code>http://localhost:8000/*</code>. The extension does not read page DOM on other sites</li>
+      <li>A background service worker only asks Chrome to open the side panel</li>
       <li>No third-party or CDN-hosted scripts</li>
       <li>No accounts, sign-in, or user identifiers of any kind</li>
     </ul>
 
     <h2>Permissions</h2>
-    <p>The extension requests exactly one permission: <code>tabs</code>. This is required to read the list of open tabs described above. No other permission is requested on any supported browser (Chrome, Firefox, or Safari).</p>
+    <p>Chrome requests <code>tabs</code>, <code>storage</code>, and <code>sidePanel</code>, plus loopback host access for local Laya. Firefox and Safari use <code>tabs</code> and <code>storage</code> with the same loopback hosts. Nothing is sent to a third-party analytics service.</p>
 
     <h2>Open source</h2>
     <p>The full source code is public and MIT-licensed, so this policy can be verified directly against the code rather than taken on faith: <a href="https://github.com/muminkoykiran/safe-tab-url-lister">github.com/muminkoykiran/safe-tab-url-lister</a>.</p>

@@ -24,10 +24,18 @@ You'll receive a response within 48 hours. If confirmed, a fix will be released 
 
 This extension is designed to minimize attack surface:
 
-- **No network requests** — nothing is sent anywhere
-- **No `host_permissions`** — cannot read page content
-- **No `storage` permission** — nothing is persisted
-- **No `background` service worker** — runs only when popup is open
-- **No external scripts** — zero CDN or third-party JS
-- **Only `tabs` permission** — reads the URL, title, index, tab/opener/group IDs, last-accessed
-  time, and incognito flag of open tabs, all in memory only, discarded when the popup closes
+- **No remote analytics** — the only network calls are optional `GET /health` and `POST /v1/systemone` to `127.0.0.1:8000` or `localhost:8000`
+- **Host access is loopback only** — the extension cannot read page DOM on the public web
+- **`storage` is on-device** — saved tabs stay in `chrome.storage.local`. Full URLs are stored only if the user opts in; the default field is redacted
+- **A small service worker** opens the Chrome side panel. It does not upload tab data
+- **No external scripts** — the UI is bundled; nothing is loaded from a CDN at runtime
+- **`tabs`** — reads open tab URL, title, and favicon so they can be listed, saved, and exported
+
+## Export and paste risks
+
+The product is a local data-export tool. Treat exported output as **sensitive**:
+
+- Tab URLs often contain OAuth tokens, session ids, or other secrets in query strings.
+- With browser “Allow in Incognito / Private” enabled and “Include all windows” checked, private-session URLs and an `incognito` flag can appear in the output.
+- Data is shown in the popup textarea as soon as the list is built, and also written to the clipboard when you click **Copy**. Anything with clipboard access on the device can read it afterward.
+- Paste only into destinations you trust. Markdown and spreadsheet consumers may interpret titles or cell values in ways that create unexpected links or formulas; this extension escapes common cases best-effort but cannot control the destination app.
