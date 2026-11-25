@@ -37,7 +37,7 @@ jobs:
           echo "VERSION=${RAW_TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ steps.tag.outputs.TAG }}
 
@@ -46,6 +46,17 @@ jobs:
           TAG: ${{ steps.tag.outputs.TAG }}
         run: |
           ./scripts/pkg.sh all "$TAG"
+
+      - name: Generate SHA256 checksums
+        env:
+          TAG: ${{ steps.tag.outputs.TAG }}
+        run: |
+          cd extensions
+          sha256sum \
+            "safe-tab-url-lister-chrome-${TAG}.zip" \
+            "safe-tab-url-lister-firefox-${TAG}.zip" \
+            > "SHA256SUMS-${TAG}.txt"
+          cat "SHA256SUMS-${TAG}.txt"
 
       - name: Extract changelog entry
         id: changelog
@@ -62,7 +73,7 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.3.2
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
           tag_name: ${{ steps.tag.outputs.TAG }}
           name: Safe Tab URL Lister ${{ steps.tag.outputs.TAG }}
@@ -70,5 +81,6 @@ jobs:
           files: |
             extensions/safe-tab-url-lister-chrome-${{ steps.tag.outputs.TAG }}.zip
             extensions/safe-tab-url-lister-firefox-${{ steps.tag.outputs.TAG }}.zip
+            extensions/SHA256SUMS-${{ steps.tag.outputs.TAG }}.txt
           draft: true
           prerelease: false
