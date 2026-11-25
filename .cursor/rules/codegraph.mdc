@@ -1,0 +1,6 @@
+---
+description: Prefer CodeGraph for codebase navigation. Do not use Graphify.
+alwaysApply: true
+---
+
+Prefer the CodeGraph MCP server or `codegraph explore` when you need symbols, callers, or file context in this repo. Do not install or use Graphify.
